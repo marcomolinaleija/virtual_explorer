@@ -225,6 +225,30 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 		return True
 
+	def renamePath(self, old_identifier, new_identifier):
+		"""
+		Renombra el identificador de una ruta en la lista y en la base de datos.
+		"""
+		# Comprueba si el nuevo identificador está vacío o ya existe
+		if not new_identifier or new_identifier in [item[1] for item in self.paths]:
+			# Translators: Error message if the new identifier is empty or already in use.
+			ui.message(_("El nuevo identificador no puede estar vacío o ya está en uso."))
+			return False
+		
+		try:
+			# Encuentra el índice de la ruta con el identificador antiguo
+			idx = [item[1] for item in self.paths].index(old_identifier)
+		except ValueError:
+			# Identificador no encontrado
+			return False
+
+		# Actualizar la lista
+		self.paths[idx][1] = new_identifier
+		# Actualizar la base de datos
+		self.db.execute("update paths set identifier=? where identifier=?", (new_identifier, old_identifier))
+		self.db.commit()
+		return True
+
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
 	#Translators: The function of the command is described, which is to copy the full path of the current position in the virtual menu.
 	@script(

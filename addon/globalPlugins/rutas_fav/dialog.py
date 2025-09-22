@@ -134,8 +134,13 @@ class pathsDialog(wx.Dialog):
 				self.addListItems()
 
 		elif id == 4:
-			# Translators: Message to indicate that this feature is not yet implemented.
-			ui.message(_("La función de renombrar aún no está implementada."))
+			with wx.TextEntryDialog(self, _("Introduce el nuevo nombre para la ruta:"), _("Renombrar ruta"), identifier) as dlg:
+				if dlg.ShowModal() == wx.ID_OK:
+					new_identifier = dlg.GetValue()
+					if self.data.renamePath(identifier, new_identifier):
+						ui.message(_("Ruta renombrada correctamente."))
+						self.list.DeleteAllItems()
+						self.addListItems()
 
 	def onBrowse(self, event):
 		with wx.DirDialog(self, _("Selecciona una carpeta"), style=wx.DD_DEFAULT_STYLE) as dialog:
