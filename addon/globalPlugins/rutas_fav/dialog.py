@@ -80,7 +80,7 @@ class pathsDialog(wx.Dialog):
 		self.addListItems()
 
 	def addListItems(self):
-		for idx, row in enumerate(self.data.paths):
+		for idx, row in enumerate(self.data.fav_paths):
 			self.list.InsertItem(idx, _("({}Nombre: {}, Ruta: {}").format("(Fijado) " if row[2]==1 else "", row[1], row[0]))
 
 	def onActions(self, event):
@@ -105,11 +105,11 @@ class pathsDialog(wx.Dialog):
 			return
 
 		try:
-			path_data = self.data.paths[selected_index]
+			path_data = self.data.fav_paths[selected_index]
 			path = path_data[0]
 			identifier = path_data[1]
 		except IndexError:
-			# This should not happen if the list is synchronized with self.data.paths
+			# This should not happen if the list is synchronized with self.data.fav_paths
 			ui.message(_("Error: la selección está fuera de rango."))
 			return
 
