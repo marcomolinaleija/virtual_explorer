@@ -199,6 +199,32 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			ui.message(_("Imposible añadir la ruta a la lista, favor de escribir correctamente la misma o verificar si su identificador no es igual al de uno ya existente."))
 			return False
 
+	def deletePath(self, identifier):
+		"""
+		Busca y elimina una ruta por su identificador de la lista y de la base de datos.
+		"""
+		try:
+			# Encuentra el índice de la ruta con el identificador dado
+			idx = [item[1] for item in self.paths].index(identifier)
+		except ValueError:
+			# El identificador no se ha encontrado en self.paths
+			return False
+
+		# Eliminar de la lista
+		self.paths.pop(idx)
+		# Eliminar de la base de datos
+		self.db.execute("delete from paths where identifier=?", (identifier,))
+		self.db.commit()
+
+		if not self.paths:
+			self.empty = True
+		
+		# Ajustar el contador si está fuera de los límites después de la eliminación
+		if self.counter >= len(self.paths):
+			self.counter = len(self.paths) - 1
+
+		return True
+
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
 	#Translators: The function of the command is described, which is to copy the full path of the current position in the virtual menu.
 	@script(
@@ -249,29 +275,24 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			ui.message(_("¡No hay rutas guardadas!"))
 			return
 
-		if not os.path.exists(self.paths[self.counter][0]): #Si la ruta a verificar no existe se lanza un mensaje de error y se elimina del diccionario.
-			#Translators: Error message to indicate that the path doesn't exists or is misspelled.
-			ui.message(_("La ruta guardada no existe o está mal escrita."))
-			del self.paths[self.counter]
-			self._saveInfo() #Se guardan las rutas actuales.
-			if self.counter > len(self.paths)-1: #Si la variable de contador para navegar en el menú excede la cantidad de elementos del diccionario se recorre hasta el final.
-				self.counter = len(self.paths)-1
-
-			if not self.paths and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
-				self.empty = True
+		current_path_data = self.paths[self.counter]
+		path = current_path_data[0]
+		identifier = current_path_data[1]
 
 		pressCount = getLastScriptRepeatCount() # Se asigna a una variable de control las veces que se ha pulsado la combinación de teclas, asignando 0 si no se había pulsado y 1 si ya lo había hecho anteriormente.
 		if pressCount < 1: #Si el valor de la variable anteriormente mencionada es menor a 1 (no ha sido pulsada antes la combinación) se ejecuta la ruta seleccionada.
-			os.startfile(self.paths[self.counter][0])
+			if not os.path.exists(path): #Si la ruta a verificar no existe se lanza un mensaje de error y se elimina.
+				#Translators: Error message to indicate that the path doesn't exists or is misspelled and will be deleted.
+				ui.message(_("La ruta guardada no existe o está mal escrita. Eliminando..."))
+				self.deletePath(identifier)
+				return
+			os.startfile(path)
 
 		else: #De lo contrario, la ruta se elimina.
-			del self.paths[self.counter]
-
-			#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
-			ui.message(_("Ruta eliminada correctamente de la lista."))
-			self._saveInfo()
-			if not self.paths and not self.empty: #Si la lista de las rutas está vacía y la variable empty está en False se establece en True para fines de control.
-				self.empty = True
+			if self.deletePath(identifier):
+				#Translators: Message to indicate that the operation was successful and the path along with its identifier were deleted.
+				ui.message(_("Ruta eliminada correctamente de la lista."))
+			# El método deletePath ya muestra un mensaje de error en caso de fallo.
 
 	#Decorador para asignarle su descripción y atajo de teclado a esta función del addon.
 	#Translators: The function of the command is described, which is to navigate to the previous item in the paths list.

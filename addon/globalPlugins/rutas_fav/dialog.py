@@ -98,13 +98,21 @@ class pathsDialog(wx.Dialog):
 			return
 
 		id = event.GetId()
-		item = self.list.GetItemText(self.list.GetFocusedItem())
-		if item.startswith("(Fijado)"):
-			item = item.replace(f"{item.split(')')[0]}) ", "", 1).strip()
+		selected_index = self.list.GetFocusedItem()
+		if selected_index == -1:
+			# Translators: Message to indicate that no item was selected from the list.
+			ui.message(_("Por favor, seleccione una ruta de la lista primero."))
+			return
 
-		identifier = item.split(',')[0].split(':')[1].strip()
-		path = item.split(',')[1]
-		path = path.replace(f"{path.split(':')[0]}: ", "", 1).strip()
+		try:
+			path_data = self.data.paths[selected_index]
+			path = path_data[0]
+			identifier = path_data[1]
+		except IndexError:
+			# This should not happen if the list is synchronized with self.data.paths
+			ui.message(_("Error: la selección está fuera de rango."))
+			return
+
 		if id == 1:
 			result = self.data.fix(path, identifier)
 			if result:
@@ -118,6 +126,16 @@ class pathsDialog(wx.Dialog):
 				ui.message(_("Ruta desfijada correctamente."))
 				self.list.DeleteAllItems()
 				self.addListItems()
+
+		elif id == 3:
+			if self.data.deletePath(identifier):
+				ui.message(_("Ruta eliminada correctamente."))
+				self.list.DeleteAllItems()
+				self.addListItems()
+
+		elif id == 4:
+			# Translators: Message to indicate that this feature is not yet implemented.
+			ui.message(_("La función de renombrar aún no está implementada."))
 
 	def onBrowse(self, event):
 		with wx.DirDialog(self, _("Selecciona una carpeta"), style=wx.DD_DEFAULT_STYLE) as dialog:
