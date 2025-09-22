@@ -236,8 +236,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				os.startfile(path)
 			except Exception as e:
 				ui.message(str(e))
-
-	@script(description=_("Elimina la ruta seleccionada de favoritos"), gesture="kb:delete")
+	@script(description=_("Elimina la ruta seleccionada de favoritos"), gesture="kb:alt+NVDA+delete")
 	def script_deleteItem(self, gesture):
 		if self.empty or len(self.navigation_stack) > 1:
 			return
