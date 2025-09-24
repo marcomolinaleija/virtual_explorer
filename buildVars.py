@@ -16,22 +16,22 @@ def _(arg):
 # Add-on information variables
 addon_info = {
 	# add-on Name/identifier, internal for NVDA
-	"addon_name": "Rutas_fav",
+	"addon_name": "Virtual_explorer",
 	# Add-on summary, usually the user visible name of the addon.
 	# Translators: Summary for this add-on
 	# to be shown on installation and add-on information found in Add-ons Manager.
-	"addon_summary": _("Rutas favoritas"),
+	"addon_summary": _("Explorador virtual"),
 	# Add-on description
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
-	"addon_description": _("Este addon tiene como finalidad el tener una gestión simple pero eficaz de rutas favoritas para así, en determinados casos, abrir estas rutas rápidamente"),
+	"addon_description": _("Este addon tiene como finalidad el tener una gestión simple pero eficaz de un explorador de archivos virtual para así, en determinados casos, abrir estas rutas rápidamente"),
 	# version
-	"addon_version": "1.0.2",
+	"addon_version": "1.1.0",
 	# Author(s)
-	"addon_author": "Ángel Reyes <angeldelosreyesfaz@gmail.com>",
+	"addon_author": "Marco Leija <marcoleija@marco-ml.com>",
 	# URL for the add-on documentation support
-	"addon_url": "https://github.com/reyes2005/rutas_fav/",
+	"addon_url": "https://github.com/marcomolinaleija/virtual_explorer",
 	# URL for the add-on repository where the source code can be found
-	"addon_sourceURL": "https://github.com/reyes2005/rutas_fav",
+	"addon_sourceURL": "https://github.com/marcomolinaleija/virtual_explorer",
 	# Documentation file name
 	"addon_docFileName": "readme.html",
 	# Minimum NVDA version supported (e.g. "2018.3.0", minor version is optional)
@@ -56,7 +56,7 @@ addon_info = {
 # pythonSources = ["addon/globalPlugins/*.py"]
 # For more information on SCons Glob expressions please take a look at:
 # https://scons.org/doc/production/HTML/scons-user/apd.html
-pythonSources = ["addon/globalPlugins/rutas_fav.py"]
+pythonSources = ["addon/globalPlugins/virtual_explorer/*.py"]
 
 # Files that contain strings for translation. Usually your python sources
 i18nSources = pythonSources + ["buildVars.py"]

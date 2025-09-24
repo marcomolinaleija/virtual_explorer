@@ -12,3 +12,7 @@ manifest.ini
 /[0-9]*.[0-9]*.[0-9]*.json
 *.exe
 *.bat
+
+# Test files
+/tests/
+/requirements.txt

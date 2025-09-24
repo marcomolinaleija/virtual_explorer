@@ -13,9 +13,10 @@ class pathsDialog(wx.Dialog):
 		Método de inicialización donde se creará toda la interfaz y se vincularán eventos y demás.
 		"""
 		#Translators: Title that will be displayed when the dialog appears.
-		super(pathsDialog, self).__init__(None, -1, title=_("Rutas favoritas")) #Se inicializa la clase padre para establecer el título del diálogo.
+		super(pathsDialog, self).__init__(None, -1, title=_("Explorador virtual")) #Se inicializa la clase padre para establecer el título del diálogo.
 
 		self.data = data #Se crea una referencia local hacia el objeto de globalPlugin creado en el módulo __init__, este es pasado en uno de los parámetros en el constructor.
+		self.displayed_paths = []
 
 		#Se asigna el marco correspondiente y se crea el panel donde serán añadidos los controles de GUI.
 		self.frame = frame
@@ -29,6 +30,10 @@ class pathsDialog(wx.Dialog):
 		#Translators: Label for the text area where a common name will be written to identify the saved path.
 		label2 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Identificador de la ruta (nombre a mostrar en el menú virtual):"))
 		self.identifier = wx.TextCtrl(self.Panel, wx.ID_ANY)
+
+		# Add category selection
+		label_cat = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Categoría:"))
+		self.category = wx.ComboBox(self.Panel, wx.ID_ANY, choices=self.data.categories)
 
 		# Creamos el botón para permitir la selección de una ruta mediante el explorador de archivos.
 		#Translators: a button to open the file explorer, allowing you to select a path more intuitively
@@ -64,13 +69,15 @@ class pathsDialog(wx.Dialog):
 		sizeV.Add(self.path, 0, wx.EXPAND)
 		sizeV.Add(label2, 0, wx.EXPAND)
 		sizeV.Add(self.identifier, 0, wx.EXPAND)
+		sizeV.Add(label_cat, 0, wx.EXPAND)
+		sizeV.Add(self.category, 0, wx.EXPAND)
 		sizeV.Add(label3, 0, wx.EXPAND)
-		sizeV.Add(self.list, 0, wx.EXPAND)
+		sizeV.Add(self.list, 1, wx.EXPAND) # Changed proportion to 1 to make it expand
 
-		sizeH.Add(self.actionsBTN, 2, wx.EXPAND)
-		sizeH.Add(self.acceptBTN, 2, wx.EXPAND)
-		sizeH.Add(self.cancelBTN, 2, wx.EXPAND)
-		sizeH.Add(self.webBTN, 2, wx.EXPAND)
+		sizeH.Add(self.actionsBTN, 1, wx.EXPAND)
+		sizeH.Add(self.acceptBTN, 1, wx.EXPAND)
+		sizeH.Add(self.cancelBTN, 1, wx.EXPAND)
+		sizeH.Add(self.webBTN, 1, wx.EXPAND)
 
 		sizeV.Add(sizeH, 0, wx.EXPAND)
 
@@ -82,8 +89,17 @@ class pathsDialog(wx.Dialog):
 
 	def addListItems(self):
 		self.list.DeleteAllItems()
-		for idx, row in enumerate(self.data.fav_paths):
-			self.list.InsertItem(idx, _("({}Nombre: {}, Ruta: {}").format("(Fijado) " if row[2]==1 else "", row[1], row[0]))
+		# Flatten the dictionary of paths into a single list and store it
+		self.displayed_paths = [item for cat_paths in self.data.fav_paths.values() for item in cat_paths]
+		# Sort the flattened list, e.g., by category then by identifier
+		self.displayed_paths.sort(key=lambda x: ((x[3] or "zzz"), x[1])) # Sort by category, then identifier. None category at the end.
+
+		for idx, row in enumerate(self.displayed_paths):
+			# row is [path, identifier, fixed, category]
+			category_str = f" ({row[3]})" if row[3] else ""
+			fixed_str = "(Fijado) " if row[2] == 1 else ""
+			self.list.InsertItem(idx, _("{fixed}Nombre: {id}, Ruta: {path}{cat}").format(
+				fixed=fixed_str, id=row[1], path=row[0], cat=category_str))
 
 	def onActions(self, event):
 		self.menu = wx.Menu()
@@ -101,11 +117,11 @@ class pathsDialog(wx.Dialog):
 				return
 			
 			try:
-				path_data = self.data.fav_paths[selected_index]
+				path_data = self.displayed_paths[selected_index]
 				identifier = path_data[1]
 				if self.data.deletePath(identifier):
 					ui.message(_("Ruta eliminada correctamente."))
-					self.addListItems()
+					self.addListItems() # Refresh the list
 			except IndexError:
 				ui.message(_("Error: la selección está fuera de rango."))
 		event.Skip()
@@ -118,35 +134,33 @@ class pathsDialog(wx.Dialog):
 		id = event.GetId()
 		selected_index = self.list.GetFocusedItem()
 		if selected_index == -1:
-			# Translators: Message to indicate that no item was selected from the list.
 			ui.message(_("Por favor, seleccione una ruta de la lista primero."))
 			return
 
 		try:
-			path_data = self.data.fav_paths[selected_index]
+			path_data = self.displayed_paths[selected_index]
 			path = path_data[0]
 			identifier = path_data[1]
 		except IndexError:
-			# This should not happen if the list is synchronized with self.data.fav_paths
 			ui.message(_("Error: la selección está fuera de rango."))
 			return
 
-		if id == 1:
+		if id == 1: # Fix
 			if self.data.fix(path, identifier):
 				ui.message(_("Ruta fijada correctamente."))
 				self.addListItems()
 
-		elif id == 2:
+		elif id == 2: # Unfix
 			if self.data.unfix(path, identifier):
 				ui.message(_("Ruta desfijada correctamente."))
 				self.addListItems()
 
-		elif id == 3:
+		elif id == 3: # Delete
 			if self.data.deletePath(identifier):
 				ui.message(_("Ruta eliminada correctamente."))
 				self.addListItems()
 
-		elif id == 4:
+		elif id == 4: # Rename
 			with wx.TextEntryDialog(self, _("Introduce el nuevo nombre para la ruta:"), _("Renombrar ruta"), identifier) as dlg:
 				if dlg.ShowModal() == wx.ID_OK:
 					new_identifier = dlg.GetValue()
@@ -167,11 +181,13 @@ class pathsDialog(wx.Dialog):
 			return
 
 		pathValue, identifierValue = self.path.GetValue(), self.identifier.GetValue()
+		categoryValue = self.category.GetValue()
 		pathValue = self.data.checkPath(pathValue)
-		if self.data.addPath(pathValue, identifierValue, 0):
+		if self.data.addPath(pathValue, identifierValue, categoryValue):
 			self.addListItems()
 			self.path.SetValue("")
 			self.identifier.SetValue("")
+			self.category.SetValue("")
 			self.path.SetFocus()
 
 	def onWeb(self, event):

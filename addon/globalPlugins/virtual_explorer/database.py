@@ -60,3 +60,14 @@ class database:
             self.db.rollback()
         except sqlite3.OperationalError as e:
             print(e)
+    def migrate_schema(self):
+        try:
+            # Check if 'category' column exists in 'paths' table
+            results = self.execute("PRAGMA table_info(paths)")
+            columns = [row[1] for row in results]
+            if "category" not in columns:
+                self.execute("ALTER TABLE paths ADD COLUMN category TEXT")
+                self.commit()
+        except sqlite3.OperationalError as e:
+            # This may happen if the table does not exist yet, which is fine.
+            print(f"Could not migrate schema: {e}")
