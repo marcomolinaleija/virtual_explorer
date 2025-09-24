@@ -20,6 +20,8 @@ from scriptHandler import script, getLastScriptRepeatCount
 #Importamos librerías externas a NVDA
 import os
 import json
+import shutil
+import wx
 from . import database
 from .dialog import pathsDialog
 
@@ -54,6 +56,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		self.category_index = -1
 		self.navigation_stack = []
 		self.counters = []
+		self.clipboard = None
+		self.clipboard_operation = None
+		self.context_item_path = None
 
 		self.markers = {
 			"$users": os.path.expanduser('~'),
@@ -278,6 +283,90 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				return path.replace(key, value, 1)
 		return None
 
+	ACTION_COPY = _("Copiar")
+	ACTION_CUT = _("Cortar")
+	ACTION_PASTE = _("Pegar")
+
+	def _is_actions_menu(self):
+		if self.empty:
+			return False
+		current_list = self.navigation_stack[-1]
+		# Check if the list matches our actions
+		return current_list and current_list[0] == self.ACTION_COPY
+
+	def _copy_item(self):
+		if not self.context_item_path:
+			return
+		self.clipboard = self.context_item_path
+		self.clipboard_operation = "copy"
+		ui.message(_("Copiado: {}").format(os.path.basename(self.context_item_path)))
+		self.script_exitDirectory(None) # Exit actions menu
+
+	def _cut_item(self):
+		if not self.context_item_path:
+			return
+		self.clipboard = self.context_item_path
+		self.clipboard_operation = "cut"
+		ui.message(_("Cortado: {}").format(os.path.basename(self.context_item_path)))
+		self.script_exitDirectory(None) # Exit actions menu
+
+	def _paste_item(self):
+		if not self.clipboard:
+			ui.message(_("El portapapeles está vacío"))
+			return
+
+		# Destination is the directory of the item we opened the menu on
+		dest_dir = self.context_item_path
+		if not os.path.isdir(dest_dir):
+			dest_dir = os.path.dirname(dest_dir)
+
+		source_path = self.clipboard
+		dest_path = os.path.join(dest_dir, os.path.basename(source_path))
+
+		try:
+			if self.clipboard_operation == "copy":
+				if os.path.isdir(source_path):
+					shutil.copytree(source_path, dest_path)
+				else:
+					shutil.copy(source_path, dest_path)
+				ui.message(_("Elemento pegado."))
+			elif self.clipboard_operation == "cut":
+				shutil.move(source_path, dest_path)
+				ui.message(_("Elemento movido."))
+				self.clipboard = None
+				self.clipboard_operation = None
+
+			# Exit actions menu and refresh parent
+			self.script_exitDirectory(None)
+			# Refresh the view of the directory we pasted into
+			new_content = [os.path.join(dest_dir, f) for f in os.listdir(dest_dir)]
+			self.navigation_stack[-1] = new_content
+			# Try to set focus on the new item
+			try:
+				self.counters[-1] = new_content.index(dest_path)
+				self.script_nextPath(None) # Announce
+			except (ValueError, IndexError):
+				pass
+
+		except Exception as e:
+			ui.message(_("Error al pegar: {}").format(e))
+
+	@script(description=_("Muestra las acciones para el elemento actual"), gesture="kb:nvda+alt+space")
+	def script_showContextMenu(self, gesture):
+		item, path = self._getCurrentItem()
+		if not path:
+			return
+
+		self.context_item_path = path
+
+		actions = [self.ACTION_COPY, self.ACTION_CUT]
+		if self.clipboard:
+			actions.append(self.ACTION_PASTE)
+
+		self.navigation_stack.append(actions)
+		self.counters.append(-1)
+		self.script_nextPath(gesture)
+
 	@script(description=_("Abre el diálogo para ingresar nuevas rutas"), gesture="kb:alt+NVDA+a")
 	def script_addNewPath(self, gesture):
 		dialog = pathsDialog(gui.mainFrame, self)
@@ -288,6 +377,16 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 	@script(description=_("Entra en el directorio seleccionado o abre el archivo"), gesture="kb:alt+NVDA+l")
 	def script_enterDirectory(self, gesture):
+		if self._is_actions_menu():
+			item, path = self._getCurrentItem()
+			if item == self.ACTION_COPY:
+				self._copy_item()
+			elif item == self.ACTION_CUT:
+				self._cut_item()
+			elif item == self.ACTION_PASTE:
+				self._paste_item()
+			return
+
 		item, path = self._getCurrentItem()
 		if not path:
 			return
