@@ -2,15 +2,18 @@
 
 ## ¿Qué es?
 
-**Rutas fav** es un complemento para el lector de pantalla NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario, pudiendo lanzarlas, eliminarlas o añadir nuevas de manera sencilla e intuitiva para el mismo.
+**Rutas fav** es un complemento para el lector de pantalla NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario. Ahora, también funciona como un explorador de archivos virtual, permitiendo navegar dentro de las carpetas añadidas.
 
 ## ¿Cómo funciona?
 Los comandos para utilizar las funciones descritas anteriormente se describen a continuación (modificables a través del apartado gestos de entrada bajo la categoría Fav paths):
 
-* NVDA+ALT+A: Se lanza un diálogo para ingresar los datos requeridos, tales como ruta absoluta e identificador para mostrarse en el menú virtual.
-* NVDA+ALT+J: Se navega hacia el elemento anterior en la lista de rutas guardadas.
-* NVDA+ALT+K: Se navega hacia el elemento siguiente en la lista de rutas guardadas.
-* NVDA+ALT+L: Si se presiona una vez se abre la ruta seleccionada, si se presiona 2 veces rápidamente esta se abre y se elimina de la lista.
+* NVDA+ALT+A: Lanza un diálogo para ingresar nuevas rutas a la lista de favoritos.
+* NVDA+ALT+J: Navega hacia el elemento anterior en la lista actual (ya sea de favoritos o dentro de una carpeta).
+* NVDA+ALT+K: Navega hacia el elemento siguiente en la lista actual.
+* NVDA+ALT+L: Entra en el directorio seleccionado para explorar su contenido. Si es un archivo, lo abre.
+* NVDA+ALT+Enter: Abre el archivo o directorio seleccionado en el Explorador de Archivos.
+* NVDA+ALT+Retroceso: Sale del directorio actual y vuelve al nivel anterior.
+* Suprimir: Elimina la ruta seleccionada (solo funciona en la lista principal de favoritos).
 
 ## ¿Qué son los marcadores?
 
@@ -33,14 +36,17 @@ De la misma manera, si deseas realizar un donativo para que el desarrollo de est
 
 ## Changelog
 
+### v1.1.0
+*   Se ha implementado un explorador de archivos virtual. Ahora es posible entrar en las carpetas guardadas para navegar por su contenido.
+*   Se han añadido nuevos atajos de teclado para entrar, salir y abrir carpetas/archivos.
+*   Se ha refactorizado la lógica interna para soportar la navegación jerárquica.
+
 ### v1.0.2
-Corrección de la anidación de encabezados en el readme
-Corrección de errores menores de código.
+*   Corrección de la anidación de encabezados en el readme.
+*   Corrección de errores menores de código.
 
 ### v1.0.1
-
-Corrección de errores menores.
+*   Corrección de errores menores.
 
 ### v1.0
-
-Versión inicial del complemento.
+*   Versión inicial del complemento.

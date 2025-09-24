@@ -38,6 +38,7 @@ class pathsDialog(wx.Dialog):
 		label3 = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Rutas añadidas:"))
 		self.list = wx.ListCtrl(self.Panel, wx.ID_ANY, style=wx.LC_LIST | wx.LC_SINGLE_SEL)
 		self.list.Bind(wx.EVT_CONTEXT_MENU, self.onActions)
+		self.list.Bind(wx.EVT_KEY_DOWN, self.onDeleteItem)
 
 		#Se crean los botones junto con su respectiva vinculación a un método de evento que ejecutará ciertas acciones en base a si son pulsados.
 
@@ -80,7 +81,8 @@ class pathsDialog(wx.Dialog):
 		self.addListItems()
 
 	def addListItems(self):
-		for idx, row in enumerate(self.data.paths):
+		self.list.DeleteAllItems()
+		for idx, row in enumerate(self.data.fav_paths):
 			self.list.InsertItem(idx, _("({}Nombre: {}, Ruta: {}").format("(Fijado) " if row[2]==1 else "", row[1], row[0]))
 
 	def onActions(self, event):
@@ -92,84 +94,94 @@ class pathsDialog(wx.Dialog):
 		self.menu.Bind(wx.EVT_MENU, self.onMenu)
 		self.actionsBTN.PopupMenu(self.menu)
 
+	def onDeleteItem(self, event):
+		if event.GetKeyCode() == wx.WXK_DELETE:
+			selected_index = self.list.GetFocusedItem()
+			if selected_index == -1:
+				return
+			
+			try:
+				path_data = self.data.fav_paths[selected_index]
+				identifier = path_data[1]
+				if self.data.deletePath(identifier):
+					ui.message(_("Ruta eliminada correctamente."))
+					self.addListItems()
+			except IndexError:
+				ui.message(_("Error: la selección está fuera de rango."))
+		event.Skip()
+
 	def onMenu(self, event):
 		if self.list.GetItemCount() == 0:
 			ui.message(_("No hay rutas guardadas."))
 			return
 
 		id = event.GetId()
-		item = self.list.GetItemText(self.list.GetFocusedItem())
-		if item.startswith("(Fijado)"):
-			item = item.replace(f"{item.split(')')[0]}) ", "", 1).strip()
+		selected_index = self.list.GetFocusedItem()
+		if selected_index == -1:
+			# Translators: Message to indicate that no item was selected from the list.
+			ui.message(_("Por favor, seleccione una ruta de la lista primero."))
+			return
 
-		identifier = item.split(',')[0].split(':')[1].strip()
-		path = item.split(',')[1]
-		path = path.replace(f"{path.split(':')[0]}: ", "", 1).strip()
+		try:
+			path_data = self.data.fav_paths[selected_index]
+			path = path_data[0]
+			identifier = path_data[1]
+		except IndexError:
+			# This should not happen if the list is synchronized with self.data.fav_paths
+			ui.message(_("Error: la selección está fuera de rango."))
+			return
+
 		if id == 1:
-			result = self.data.fix(path, identifier)
-			if result:
+			if self.data.fix(path, identifier):
 				ui.message(_("Ruta fijada correctamente."))
-				self.list.DeleteAllItems()
 				self.addListItems()
 
 		elif id == 2:
-			result = self.data.unfix(path, identifier)
-			if result:
+			if self.data.unfix(path, identifier):
 				ui.message(_("Ruta desfijada correctamente."))
-				self.list.DeleteAllItems()
 				self.addListItems()
+
+		elif id == 3:
+			if self.data.deletePath(identifier):
+				ui.message(_("Ruta eliminada correctamente."))
+				self.addListItems()
+
+		elif id == 4:
+			with wx.TextEntryDialog(self, _("Introduce el nuevo nombre para la ruta:"), _("Renombrar ruta"), identifier) as dlg:
+				if dlg.ShowModal() == wx.ID_OK:
+					new_identifier = dlg.GetValue()
+					if self.data.renamePath(identifier, new_identifier):
+						ui.message(_("Ruta renombrada correctamente."))
+						self.addListItems()
 
 	def onBrowse(self, event):
 		with wx.DirDialog(self, _("Selecciona una carpeta"), style=wx.DD_DEFAULT_STYLE) as dialog:
 			if dialog.ShowModal() == wx.ID_OK:
-				# Se extrae la ruta de la carpeta para configurar el valor en el cuadro self.path
 				self.path.SetValue(dialog.GetPath())
-				# extraemos solamente el nombre de la ruta y lo configuramos en el cuadro identifier por default
 				self.identifier.SetValue(os.path.basename(dialog.GetPath()))
 
 	def onAccept(self, event):
-		"""
-		Método que responde al evento de pulsar el botón aceptar.
-		"""
-		if any(value == "" for value in [self.path.GetValue(), self.identifier.GetValue()]): #Se verifica si no existe contenido en cualquiera de los dos campos de texto no para luego lanzar un mensaje de advertencia y enfocar el cuadro correspondiente.
-			#Translators: Message to indicate that the operation failed because one or both of the text areas are empty.
+		if any(value == "" for value in [self.path.GetValue(), self.identifier.GetValue()]):
 			ui.message(_("Asegúrese de llenar correctamente los campos solicitados."))
-			self.path.SetFocus() if self.path.GetValue() == "" else self.identifier.SetFocus() if self.identifier.GetValue() == "" else None
+			self.path.SetFocus() if self.path.GetValue() == "" else self.identifier.SetFocus()
 			return
 
-		#Se obtienen los valores de los campos de texto para luego verificar si estos existen en el sistema de archivos y si su identificador no existe ya en la lista de la clave 'identifier' en el diccionario paths.
 		pathValue, identifierValue = self.path.GetValue(), self.identifier.GetValue()
 		pathValue = self.data.checkPath(pathValue)
-		self.data.addPath(pathValue, identifierValue, 0)
-		if self.IsModal(): #Si el diálogo es modal, es decir, bloquea la interacción con otras interfaces cerrarlo y establecer su valor de retorno en 0.
-			self.EndModal(wx.ID_CANCEL)
-
-		else: #Si esto no ocurre, se cierra de todas formas.
-			self.Close()
+		if self.data.addPath(pathValue, identifierValue, 0):
+			self.addListItems()
+			self.path.SetValue("")
+			self.identifier.SetValue("")
+			self.path.SetFocus()
 
 	def onWeb(self, event):
-		"""
-		Método que responde al evento de pulsar el botón para ir a la web del desarrollador.
-		"""
-		wx.LaunchDefaultBrowser("https://reyesgamer.com/") #Se lanza el navegador con la URL pasada como parámetro.
+		wx.LaunchDefaultBrowser("https://reyesgamer.com/")
 
 	def onkeyWindowDialog(self, event):
-		"""
-		Método que responde al evento de pulsar ciertas teclas en la ventana.
-		"""
-		if event.GetKeyCode() == 27: #Si se presiona la tecla ESC se cierra la ventana.
-			if self.IsModal():
-				self.EndModal(wx.ID_CANCEL)
-			else:
-				self.Close()
-		else: #Si la condición anterior no se cumple, se omite el evento interno del diálogo.
+		if event.GetKeyCode() == 27:
+			self.Close()
+		else:
 			event.Skip()
 
 	def onCancel(self, event):
-		"""
-		Método que responde al evento de pulsar el botón cancelar.
-		"""
-		if self.IsModal(): #Si la ventana está abierta, se cierra.
-			self.EndModal(wx.ID_CANCEL)
-		else:
-			self.Close()
+		self.Close()

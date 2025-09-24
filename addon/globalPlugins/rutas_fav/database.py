@@ -55,7 +55,7 @@ class database:
             self.db.commit()
         except sqlite3.OperationalError as e:
             print(e)
-def rollback(self):
+    def rollback(self):
         try:
             self.db.rollback()
         except sqlite3.OperationalError as e:
