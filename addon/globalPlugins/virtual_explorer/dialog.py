@@ -33,7 +33,9 @@ class pathsDialog(wx.Dialog):
 
 		# Add category selection
 		label_cat = wx.StaticText(self.Panel, wx.ID_ANY, label=_("&Categoría:"))
-		self.category = wx.ComboBox(self.Panel, wx.ID_ANY, choices=self.data.categories)
+		categories = [_("Todas")] + self.data.categories
+		self.category = wx.ComboBox(self.Panel, wx.ID_ANY, choices=categories)
+		self.category.Bind(wx.EVT_COMBOBOX, self.onCategoryChange)
 
 		# Creamos el botón para permitir la selección de una ruta mediante el explorador de archivos.
 		#Translators: a button to open the file explorer, allowing you to select a path more intuitively
@@ -85,21 +87,30 @@ class pathsDialog(wx.Dialog):
 		self.Panel.SetSizer(sizeV)
 		self.CenterOnScreen()
 
+		self.category.SetValue(_("Todas"))
 		self.addListItems()
 
-	def addListItems(self):
+	def addListItems(self, category=None):
 		self.list.DeleteAllItems()
-		# Flatten the dictionary of paths into a single list and store it
-		self.displayed_paths = [item for cat_paths in self.data.fav_paths.values() for item in cat_paths]
-		# Sort the flattened list, e.g., by category then by identifier
-		self.displayed_paths.sort(key=lambda x: ((x[3] or "zzz"), x[1])) # Sort by category, then identifier. None category at the end.
+		if category and category != _("Todas"):
+			self.displayed_paths = self.data.fav_paths.get(category, [])
+		else:
+			# Flatten the dictionary of paths into a single list and store it
+			self.displayed_paths = [item for cat_paths in self.data.fav_paths.values() for item in cat_paths]
+		
+		# Sort the displayed list
+		self.displayed_paths.sort(key=lambda x: (not x[2], x[1])) # Sort by fixed status (desc) and then by identifier (asc)
 
 		for idx, row in enumerate(self.displayed_paths):
 			# row is [path, identifier, fixed, category]
-			category_str = f" ({row[3]})" if row[3] else ""
+			category_str = f" ({row[3]})" if row[3] and (not category or category == _("Todas")) else ""
 			fixed_str = "(Fijado) " if row[2] == 1 else ""
 			self.list.InsertItem(idx, _("{fixed}Nombre: {id}, Ruta: {path}{cat}").format(
 				fixed=fixed_str, id=row[1], path=row[0], cat=category_str))
+
+	def onCategoryChange(self, event):
+		selected_category = self.category.GetValue()
+		self.addListItems(selected_category)
 
 	def onActions(self, event):
 		self.menu = wx.Menu()
