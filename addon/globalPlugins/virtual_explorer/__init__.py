@@ -430,12 +430,12 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			except PermissionError:
 				ui.message(_("Acceso denegado"))
 			except Exception as e:
-				ui.message(str(e))
+				ui.message(_("Error: {}").format(e))
 		else:
 			try:
 				os.startfile(path)
 			except Exception as e:
-				ui.message(str(e))
+				ui.message(_("Error: {}").format(e))
 
 	@script(description=_("Vuelve al directorio anterior"), gesture="kb:alt+NVDA+backspace")
 	def script_exitDirectory(self, gesture):
@@ -465,7 +465,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			try:
 				os.startfile(path)
 			except Exception as e:
-				ui.message(str(e))
+				ui.message(_("Error: {}").format(e))
 	@script(description=_("Elimina la ruta seleccionada de favoritos"), gesture="kb:alt+NVDA+delete")
 	def script_deleteItem(self, gesture):
 		if self.empty or len(self.navigation_stack) > 1:

@@ -1,40 +1,73 @@
-# Rutas fav
+# Virtual Explorer
 
 ## ¿Qué es?
 
-**Rutas fav** es un complemento para el lector de pantalla NVDA cuya finalidad consiste en mantener una gestión rápida y simple de las rutas favoritas del usuario. Ahora, también funciona como un explorador de archivos virtual, permitiendo navegar dentro de las carpetas añadidas.
+**Virtual Explorer** es un complemento para el lector de pantalla NVDA que te permite gestionar y navegar por tus rutas de archivos y carpetas favoritas de una manera rápida y eficiente. Funciona como un **explorador de archivos virtual** directamente en NVDA, permitiéndote explorar el contenido de las carpetas que has guardado.
 
-## ¿Cómo funciona?
-Los comandos para utilizar las funciones descritas anteriormente se describen a continuación (modificables a través del apartado gestos de entrada bajo la categoría Fav paths):
+## Características Principales
 
-* NVDA+ALT+A: Lanza un diálogo para ingresar nuevas rutas a la lista de favoritos.
-* NVDA+ALT+J: Navega hacia el elemento anterior en la lista actual (ya sea de favoritos o dentro de una carpeta).
-* NVDA+ALT+K: Navega hacia el elemento siguiente en la lista actual.
-* NVDA+ALT+L: Entra en el directorio seleccionado para explorar su contenido. Si es un archivo, lo abre.
-* NVDA+ALT+Enter: Abre el archivo o directorio seleccionado en el Explorador de Archivos.
-* NVDA+ALT+Retroceso: Sale del directorio actual y vuelve al nivel anterior.
-* Suprimir: Elimina la ruta seleccionada (solo funciona en la lista principal de favoritos).
+*   **Gestión de Favoritos:** Añade, renombra, elimina y fija tus rutas favoritas.
+*   **Organización por Categorías:** Agrupa tus rutas en categorías personalizadas para tener un acceso más ordenado.
+*   **Navegación Virtual:** Explora el contenido de las carpetas guardadas sin necesidad de abrir el explorador de archivos de Windows.
+*   **Menú de Acciones:** Realiza operaciones básicas como Copiar, Cortar y Pegar directamente desde el explorador virtual.
+*   **Marcadores Dinámicos:** Utiliza marcadores como `$desktop` o `$downloads` para acceder rápidamente a carpetas comunes del sistema.
+
+## Atajos de Teclado
+
+Los atajos de teclado se pueden personalizar desde el diálogo de **Gestos de Entrada** de NVDA, bajo la categoría "Virtual Explorer".
+
+### Navegación General
+*   `NVDA+Alt+A`: Abre el diálogo de administración para añadir, renombrar y gestionar rutas y categorías.
+*   `NVDA+Alt+J`: Navega al elemento anterior.
+*   `NVDA+Alt+K`: Navega al elemento siguiente.
+*   `NVDA+Alt+L`: Entra en una carpeta para explorar su contenido o abre un archivo. También sirve para activar una opción en el menú de acciones.
+*   `NVDA+Alt+Enter`: Abre el archivo o carpeta con la aplicación predeterminada. También sirve para activar una opción en el menú de acciones.
+*   `NVDA+Alt+Retroceso`: Vuelve a la carpeta anterior o sale del explorador virtual.
+*   `Alt+NVDA+Delete`: Elimina la ruta favorita seleccionada. **Nota:** Esta acción solo funciona en la lista principal de favoritos, no dentro de una carpeta que estés explorando.
+*   `Suprimir`: Dentro del diálogo de administración (`NVDA+Alt+A`), elimina la ruta seleccionada en la lista.
+
+### Navegación por Categorías
+*   `NVDA+Alt+FlechaArriba`: Navega a la categoría anterior.
+*   `NVDA+Alt+FlechaAbajo`: Navega a la categoría siguiente.
+
+### Menú de Acciones
+*   `NVDA+Alt+Espacio`: Muestra un menú contextual con acciones para el elemento seleccionado. Las acciones disponibles son:
+    *   **Copiar:** Copia el archivo/carpeta.
+    *   **Cortar:** Corta el archivo/carpeta.
+    *   **Pegar:** Pega el contenido del portapapeles en la carpeta actual (esta opción solo aparece si hay algo en el portapapeles).
+    *   **Copiar como ruta de acceso:** Copia la ruta completa del archivo/carpeta al portapapeles.
+
+**Nota:** Para **renombrar** una ruta o categoría, debes usar las opciones correspondientes dentro del diálogo de administración (`NVDA+Alt+A`).
 
 ## ¿Qué son los marcadores?
 
-Los marcadores son algunas palabras clave con el signo de dólar ($) al principio de estas, las cuales definen rutas predeterminadas de la computadora para acceder más rápidamente a las mismas. Están disponibles:
+Los marcadores son palabras clave que comienzan con `$` y que apuntan a rutas predeterminadas del sistema. Esto te permite acceder a ellas rápidamente sin escribir la ruta completa.
 
-* $users: Ruta del usuario, por ejemplo: C:\users\miusuario
-* $desktop: Ruta del escritorio, por ejemplo: C:\users\miusuario\desktop
-* $downloads: Ruta de descargas.
-* $documents: Ruta de documentos.
-* $videos: Ruta de videos.
-* $pictures: Ruta de imágenes.
+*   `$users`: Ruta de tu perfil de usuario (ej. `C:\Users\TuUsuario`).
+*   `$desktop`: Ruta de tu escritorio.
+*   `$downloads`: Ruta de la carpeta de descargas.
+*   `$documents`: Ruta de la carpeta de documentos.
+*   `$videos`: Ruta de la carpeta de videos.
+*   `$pictures`: Ruta de la carpeta de imágenes.
 
-Para poder utilizarlas correctamente, los antes mencionados deben estar al principio de la ruta, por ejemplo: $desktop\carpeta1, siendo esta: C:\users\miusuario\desktop\carpeta1.
+**Ejemplo de uso:** `$desktop\MiCarpeta` se resolverá a `C:\Users\TuUsuario\Desktop\MiCarpeta`.
 
 ## Notas
 
-Agradezco la ayuda de [@rayo-alcantar](https://github.com/rayo-alcantar/) quien me ha apoyado en algunas situaciones imprevistas, así como también introducido al mundo de desarrollo de complementos para este lector de pantalla.  
-Si deseas contribuir con una pull request o apertura de una issue en dado caso se presenten problemas, no dudes en hacerlo. Así mismo, si deseas hacerme algún comentario o sugerencia, mi [correo](mailto:angeldelosreyesfaz@gmail.com) está disponible para recibirte.  
-De la misma manera, si deseas realizar un donativo para que el desarrollo de este y próximos complementos/programas continúe, no dudes en dar click [aquí](https://www.paypal.com/paypalme/r05angel).  
+Este complemento es una bifurcación (fork) y una reimaginación del antiguo complemento [Rutas Favoritas](https://github.com/reyes2005/rutas_fav), manteniendo su idea original pero con un código y características renovadas.
+
+Si deseas contribuir con una pull request o apertura de una issue en dado caso se presenten problemas, no dudes en hacerlo. Así mismo, si deseas hacerme algún comentario o sugerencia, mi [correo](mailto:marcoleija@marco-ml.com) está disponible para recibirte.  
+De la misma manera, si deseas realizar un donativo para que el desarrollo de este y próximos complementos/programas continúe, no dudes en dar click [aquí](https://paypal.me/paymentToMl).  
 
 ## Changelog
+
+### v2.0.0 (Próxima)
+*   **Renombrado a Virtual Explorer:** El complemento ha sido renombrado de "Rutas fav" a "Virtual Explorer" para reflejar mejor su funcionalidad.
+*   **Gestión de Categorías:** Se ha añadido la capacidad de organizar las rutas favoritas por categorías, incluyendo la opción de renombrarlas desde el diálogo de administración.
+*   **Menú de Acciones Contextual:** Se implementó un menú contextual (`NVDA+Alt+Espacio`) que permite realizar operaciones de archivo (Copiar, Cortar, Pegar) y copiar rutas.
+*   **Gestión Mejorada:** La funcionalidad para renombrar y fijar/desfijar rutas ahora se encuentra en el diálogo de administración para una gestión más centralizada.
+*   **Nuevos Atajos:** Se han añadido atajos para la navegación por categorías.
+*   **Mejoras de Usabilidad:** El lector de pantalla ahora anuncia el número de elementos en cada categoría.
 
 ### v1.1.0
 *   Se ha implementado un explorador de archivos virtual. Ahora es posible entrar en las carpetas guardadas para navegar por su contenido.

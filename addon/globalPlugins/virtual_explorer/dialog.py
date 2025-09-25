@@ -60,9 +60,6 @@ class pathsDialog(wx.Dialog):
 		#Translators: It is the cancel button to cancel the process and close the dialog.
 		self.cancelBTN = wx.Button(self.Panel, label=_("Cancelar"))
 		self.cancelBTN.Bind(wx.EVT_BUTTON, self.onCancel)
-		#Translators: It is the web button to open the developer website in the browser.
-		self.webBTN = wx.Button(self.Panel, label=_("&Visitar la web del desarrollador"))
-		self.webBTN.Bind(wx.EVT_BUTTON, self.onWeb)
 		#Se hace una vinculación hacia un método de evento para controlar teclas en la ventana.
 		self.Bind(wx.EVT_CHAR_HOOK, self.onkeyWindowDialog)
 
@@ -83,7 +80,6 @@ class pathsDialog(wx.Dialog):
 		sizeH.Add(self.actionsBTN, 1, wx.EXPAND)
 		sizeH.Add(self.acceptBTN, 1, wx.EXPAND)
 		sizeH.Add(self.cancelBTN, 1, wx.EXPAND)
-		sizeH.Add(self.webBTN, 1, wx.EXPAND)
 
 		sizeV.Add(sizeH, 0, wx.EXPAND)
 
@@ -108,9 +104,10 @@ class pathsDialog(wx.Dialog):
 		for idx, row in enumerate(self.displayed_paths):
 			# row is [path, identifier, fixed, category]
 			category_str = f" ({row[3]})" if row[3] and (not category or category == _("Todas")) else ""
-			fixed_str = "(Fijado) " if row[2] == 1 else ""
-			self.list.InsertItem(idx, _("{fixed}Nombre: {id}, Ruta: {path}{cat}").format(
-				fixed=fixed_str, id=row[1], path=row[0], cat=category_str))
+			if row[2] == 1:
+				self.list.InsertItem(idx, _("(Fijado) Nombre: {id}, Ruta: {path}{cat}").format(id=row[1], path=row[0], cat=category_str))
+			else:
+				self.list.InsertItem(idx, _("Nombre: {id}, Ruta: {path}{cat}").format(id=row[1], path=row[0], cat=category_str))
 
 	def onCategoryChange(self, event):
 		selected_category = self.category.GetValue()
@@ -226,9 +223,6 @@ class pathsDialog(wx.Dialog):
 			self.identifier.SetValue("")
 			self.category.SetValue("")
 			self.path.SetFocus()
-
-	def onWeb(self, event):
-		wx.LaunchDefaultBrowser("https://reyesgamer.com/")
 
 	def onkeyWindowDialog(self, event):
 		if event.GetKeyCode() == 27:
