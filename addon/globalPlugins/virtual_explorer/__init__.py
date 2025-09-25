@@ -488,7 +488,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			self.category_index = 0
 		
 		current_category_name = self.categories[self.category_index]
-		ui.message(current_category_name)
+		num_items = len(self.fav_paths.get(current_category_name, []))
+		ui.message(_("{} ({} elementos)").format(current_category_name, num_items))
 		
 		# Reset navigation to the new category's path list
 		self.navigation_stack = [self.fav_paths[current_category_name]]
@@ -508,7 +509,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			self.category_index = len(self.categories) - 1
 		
 		current_category_name = self.categories[self.category_index]
-		ui.message(current_category_name)
+		num_items = len(self.fav_paths.get(current_category_name, []))
+		ui.message(_("{} ({} elementos)").format(current_category_name, num_items))
 
 		# Reset navigation to the new category's path list
 		self.navigation_stack = [self.fav_paths[current_category_name]]
