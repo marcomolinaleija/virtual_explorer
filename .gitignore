@@ -16,3 +16,4 @@ manifest.ini
 # Test files
 /tests/
 /requirements.txt
+GEMINI.md

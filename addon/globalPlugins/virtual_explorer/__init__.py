@@ -82,11 +82,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	def _getCurrentItem(self):
 		if self.empty or self.counters[-1] < 0:
 			return None, None
-		
 		current_list = self.navigation_stack[-1]
 		if not current_list or self.counters[-1] >= len(current_list):
 			return None, None
-
 		item = current_list[self.counters[-1]]
 		path = item[0] if isinstance(item, list) else item
 		return item, path
@@ -299,7 +297,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 			return
 		self.clipboard = self.context_item_path
 		self.clipboard_operation = "copy"
-		ui.message(_("Copiado: {}").format(os.path.basename(self.context_item_path)))
+		ui.message(_("Copiado, listo para pegar: {}").format(os.path.basename(self.context_item_path)))
 		self.script_exitDirectory(None) # Exit actions menu
 
 	def _cut_item(self):
@@ -478,6 +476,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 	@script(description=_("Va a la siguiente categoría"), gesture="kb:NVDA+alt+downArrow")
 	def script_nextCategory(self, gesture):
+		if self._is_actions_menu():
+			ui.message(_("No puedes cambiar de categoría mientras estás en el menú de acciones. Pulsa alt+nvda+retroceso para salir."))
+			return
 		if not self.categories:
 			ui.message(_("No hay categorías."))
 			return
@@ -495,6 +496,9 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 	@script(description=_("Va a la categoría anterior"), gesture="kb:NVDA+alt+upArrow")
 	def script_previousCategory(self, gesture):
+		if self._is_actions_menu():
+			ui.message(_("No puedes cambiar de categoría mientras estás en el menú de acciones. Pulsa alt+nvda+retroceso para salir."))
+			return
 		if not self.categories:
 			ui.message(_("No hay categorías."))
 			return
