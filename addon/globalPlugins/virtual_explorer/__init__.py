@@ -300,6 +300,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 	ACTION_COPY = _("Copiar")
 	ACTION_CUT = _("Cortar")
 	ACTION_PASTE = _("Pegar")
+	ACTION_COPY_PATH = _("Copiar como ruta de acceso")
 
 	def _is_actions_menu(self):
 		if self.empty:
@@ -365,6 +366,16 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 		except Exception as e:
 			ui.message(_("Error al pegar: {}").format(e))
 
+	def _copy_path(self):
+		if not self.context_item_path:
+			return
+		try:
+			api.copyToClip(self.context_item_path)
+			ui.message(_("Ruta copiada al portapapeles"))
+		except Exception as e:
+			ui.message(_("Error al copiar la ruta: {}").format(e))
+		self.script_exitDirectory(None) # Exit actions menu
+
 	@script(description=_("Muestra las acciones para el elemento actual"), gesture="kb:nvda+alt+space")
 	def script_showContextMenu(self, gesture):
 		item, path = self._getCurrentItem()
@@ -373,7 +384,7 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 		self.context_item_path = path
 
-		actions = [self.ACTION_COPY, self.ACTION_CUT]
+		actions = [self.ACTION_COPY, self.ACTION_CUT, self.ACTION_COPY_PATH]
 		if self.clipboard:
 			actions.append(self.ACTION_PASTE)
 
@@ -399,6 +410,8 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 				self._cut_item()
 			elif item == self.ACTION_PASTE:
 				self._paste_item()
+			elif item == self.ACTION_COPY_PATH:
+				self._copy_path()
 			return
 
 		item, path = self._getCurrentItem()
