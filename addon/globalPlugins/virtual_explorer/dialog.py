@@ -37,6 +37,9 @@ class pathsDialog(wx.Dialog):
 		self.category = wx.ComboBox(self.Panel, wx.ID_ANY, choices=categories)
 		self.category.Bind(wx.EVT_COMBOBOX, self.onCategoryChange)
 
+		self.categoryActionsBTN = wx.Button(self.Panel, label=_("Acciones de categoría"))
+		self.categoryActionsBTN.Bind(wx.EVT_BUTTON, self.onCategoryActions)
+
 		# Creamos el botón para permitir la selección de una ruta mediante el explorador de archivos.
 		#Translators: a button to open the file explorer, allowing you to select a path more intuitively
 		self.browseBTN = wx.Button(self.Panel, label=_("&Examinar..."))
@@ -73,6 +76,7 @@ class pathsDialog(wx.Dialog):
 		sizeV.Add(self.identifier, 0, wx.EXPAND)
 		sizeV.Add(label_cat, 0, wx.EXPAND)
 		sizeV.Add(self.category, 0, wx.EXPAND)
+		sizeV.Add(self.categoryActionsBTN, 0, wx.EXPAND)
 		sizeV.Add(label3, 0, wx.EXPAND)
 		sizeV.Add(self.list, 1, wx.EXPAND) # Changed proportion to 1 to make it expand
 
@@ -111,6 +115,28 @@ class pathsDialog(wx.Dialog):
 	def onCategoryChange(self, event):
 		selected_category = self.category.GetValue()
 		self.addListItems(selected_category)
+
+	def onCategoryActions(self, event):
+		self.menu = wx.Menu()
+		item1 = self.menu.Append(1, _("Renombrar categoría"))
+		self.menu.Bind(wx.EVT_MENU, self.onRenameCategory)
+		self.categoryActionsBTN.PopupMenu(self.menu)
+
+	def onRenameCategory(self, event):
+		selected_category = self.category.GetValue()
+		if selected_category == _("Todas") or selected_category == "":
+			ui.message(_("Por favor, seleccione una categoría para renombrar."))
+			return
+		with wx.TextEntryDialog(self, _("Introduce el nuevo nombre para la categoría:"), _("Renombrar categoría"), selected_category) as dlg:
+			if dlg.ShowModal() == wx.ID_OK:
+				new_category = dlg.GetValue()
+				if self.data.renameCategory(selected_category, new_category):
+					ui.message(_("Categoría renombrada correctamente."))
+					# Update categories in the ComboBox
+					new_categories = [_("Todas")] + self.data.categories
+					self.category.SetItems(new_categories)
+					self.category.SetValue(new_category)
+					self.addListItems(new_category)
 
 	def onActions(self, event):
 		self.menu = wx.Menu()

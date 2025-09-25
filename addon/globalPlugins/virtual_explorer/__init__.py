@@ -271,6 +271,22 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 		return True
 
+	def renameCategory(self, old_category, new_category):
+		if not new_category:
+			ui.message(_("El nombre de la nueva categoría no puede estar vacío."))
+			return False
+		if new_category in self.categories:
+			ui.message(_("La categoría ya existe."))
+			return False
+
+		# Update database
+		self.db.execute("update paths set category=? where category=?", (new_category, old_category))
+		self.db.commit()
+
+		# Reload info
+		self._loadInfo()
+		return True
+
 	def checkPath(self, path):
 		newPath = self._checkMarkers(path)
 		return newPath if newPath is not None else path
