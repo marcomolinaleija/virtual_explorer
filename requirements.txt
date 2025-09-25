@@ -1,0 +1,5 @@
+# This file contains the build-time dependencies for the addon.
+# These packages are not needed to run the addon in NVDA, but are required to build the .nvda-addon file from the source code.
+
+scons
+markdown

@@ -1,0 +1,58 @@
+name: Release Add-on
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8' # NVDA compatibility
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $env:GITHUB_ENV
+
+      - name: Build the add-on
+        run: scons
+
+      - name: Extract Release Notes
+        id: extract_release_notes
+        shell: pwsh
+        run: |
+          $version = "${{ env.VERSION }}"
+          $readme = Get-Content -Path readme.md -Raw
+          $startIndex = $readme.IndexOf("### v$version")
+          if ($startIndex -eq -1) {
+            echo "Release notes for version $version not found."
+            $notes = "Release notes not found."
+          } else {
+            $nextIndex = $readme.IndexOf("### v", $startIndex + 1)
+            if ($nextIndex -eq -1) {
+              $notes = $readme.Substring($startIndex)
+            } else {
+              $notes = $readme.Substring($startIndex, $nextIndex - $startIndex)
+            }
+            # Clean up the notes
+            $notes = $notes.Trim()
+          }
+          echo "NOTES<<EOF" >> $env:GITHUB_OUTPUT
+          echo "$notes" >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.extract_release_notes.outputs.NOTES }}
+          files: Virtual_explorer-${{ env.VERSION }}.nvda-addon
