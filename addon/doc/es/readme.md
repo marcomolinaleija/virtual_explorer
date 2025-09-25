@@ -56,12 +56,12 @@ Los marcadores son palabras clave que comienzan con `$` y que apuntan a rutas pr
 
 Este complemento es una bifurcación (fork) y una reimaginación del antiguo complemento [Rutas Favoritas](https://github.com/reyes2005/rutas_fav), manteniendo su idea original pero con un código y características renovadas.
 
-Si deseas contribuir con una pull request o apertura de una issue en dado caso se presenten problemas, no dudes en hacerlo. Así mismo, si deseas hacerme algún comentario o sugerencia, mi [correo](mailto:marcoleija@marco-ml.com) está disponible para recibirte.  
-De la misma manera, si deseas realizar un donativo para que el desarrollo de este y próximos complementos/programas continúe, no dudes en dar click [aquí](https://paypal.me/paymentToMl).  
+Si deseas contribuir con una pull request o apertura de una issue en dado caso se presenten problemas, puedes hacerlo. Así mismo, si deseas hacerme algún comentario o sugerencia, puedes escribir al [correo](mailto:marcoleija@marco-ml.com)  
+De la misma manera, si deseas realizar un donativo para que el desarrollo de este y próximos complementos continúen, no dudes en dar click [aquí](https://paypal.me/paymentToMl).  
 
 ## Changelog
 
-### v2.0.0 (Próxima)
+### v2.0.0
 *   **Renombrado a Virtual Explorer:** El complemento ha sido renombrado de "Rutas fav" a "Virtual Explorer" para reflejar mejor su funcionalidad.
 *   **Gestión de Categorías:** Se ha añadido la capacidad de organizar las rutas favoritas por categorías, incluyendo la opción de renombrarlas desde el diálogo de administración.
 *   **Menú de Acciones Contextual:** Se implementó un menú contextual (`NVDA+Alt+Espacio`) que permite realizar operaciones de archivo (Copiar, Cortar, Pegar) y copiar rutas.
