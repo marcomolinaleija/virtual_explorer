@@ -448,6 +448,18 @@ class GlobalPlugin (globalPluginHandler.GlobalPlugin):
 
 	@script(description=_("Abre el archivo o directorio seleccionado"), gesture="kb:alt+NVDA+enter")
 	def script_launchItem(self, gesture):
+		if self._is_actions_menu():
+			item, path = self._getCurrentItem()
+			if item == self.ACTION_COPY:
+				self._copy_item()
+			elif item == self.ACTION_CUT:
+				self._cut_item()
+			elif item == self.ACTION_PASTE:
+				self._paste_item()
+			elif item == self.ACTION_COPY_PATH:
+				self._copy_path()
+			return
+
 		item, path = self._getCurrentItem()
 		if path:
 			try:
